@@ -7,6 +7,9 @@
 <p align="center">
   A cross-platform frameless window based on PySide6
 </p>
+<p align="center">
+  <a style="text-decoration:none" href="https://github.com/zhiyiYo/PyQt-Frameless-Window">Form zhiyiYo/PyQt-Frameless-Window</a>
+</p>
 
 <p align="center">
   <a style="text-decoration:none">

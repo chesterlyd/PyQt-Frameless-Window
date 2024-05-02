@@ -6,6 +6,7 @@ from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import QAbstractButton
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtXml import QDomDocument
+from loguru import logger
 
 from .._rc import resource
 
@@ -140,6 +141,17 @@ class TitleBarButton(QAbstractButton):
         """
         self._pressedBgColor = QColor(color)
         self.update()
+
+    def setHide(self, hide: bool = True):
+        """ set the button visible or not
+
+        Parameters
+        ----------
+        hide: bool
+            whether to hide the button
+        """
+        logger.debug(f"setHide: {hide}")
+        self.setVisible(not hide)
 
     def enterEvent(self, e):
         self.setState(TitleBarButtonState.HOVER)
@@ -278,19 +290,19 @@ class MaximizeButton(TitleBarButton):
         painter.setPen(pen)
 
         r = self.devicePixelRatioF()
-        painter.scale(1/r, 1/r)
+        painter.scale(1 / r, 1 / r)
         if not self._isMax:
-            painter.drawRect(int(18*r), int(11*r), int(10*r), int(10*r))
+            painter.drawRect(int(18 * r), int(11 * r), int(10 * r), int(10 * r))
         else:
-            painter.drawRect(int(18*r), int(13*r), int(8*r), int(8*r))
-            x0 = int(18*r)+int(2*r)
-            y0 = 13*r
-            dw = int(2*r)
+            painter.drawRect(int(18 * r), int(13 * r), int(8 * r), int(8 * r))
+            x0 = int(18 * r) + int(2 * r)
+            y0 = 13 * r
+            dw = int(2 * r)
             path = QPainterPath(QPointF(x0, y0))
-            path.lineTo(x0, y0-dw)
-            path.lineTo(x0+8*r, y0-dw)
-            path.lineTo(x0+8*r, y0-dw+8*r)
-            path.lineTo(x0+8*r-dw, y0-dw+8*r)
+            path.lineTo(x0, y0 - dw)
+            path.lineTo(x0 + 8 * r, y0 - dw)
+            path.lineTo(x0 + 8 * r, y0 - dw + 8 * r)
+            path.lineTo(x0 + 8 * r - dw, y0 - dw + 8 * r)
             painter.drawPath(path)
 
 
@@ -303,3 +315,42 @@ class CloseButton(SvgTitleBarButton):
         self.setPressedColor(Qt.white)
         self.setHoverBackgroundColor(QColor(232, 17, 35))
         self.setPressedBackgroundColor(QColor(241, 112, 122))
+
+
+class ToolButton(TitleBarButton):
+
+    def __init__(self, item_key, icon=None, text: str = "", parent=None, is_enabled=True):
+        super().__init__(parent)
+        self.setEnabled(is_enabled)
+
+        self._icon = icon
+        self._text = text
+
+        self.setProperty("item_key", item_key)
+
+    def setText(self, text):
+        self._text = text
+        self.update()
+
+    def setIcon(self, icon):
+        self._icon = icon
+        self.update()
+
+    def paintEvent(self, e):
+        painter = QPainter(self)
+        color, bgColor = self._getColors()
+
+        # draw background
+        painter.setBrush(bgColor)
+        painter.setPen(Qt.NoPen)
+        painter.drawRect(self.rect())
+
+        # draw text
+        if self._text:
+            if isinstance(self._text, str):  # Ensure self._text is a string
+                painter.setPen(color)
+                painter.setFont(self.font())
+                painter.drawText(self.rect(), Qt.AlignCenter, self._text)
+
+        if self._icon:
+            painter.drawPixmap(self.rect(), self._icon)

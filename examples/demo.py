@@ -15,6 +15,7 @@ class CustomTitleBar(StandardTitleBar):
         super().__init__(parent)
 
         # customize the style of title bar button
+        self.minBtn.setVisible(False)
         self.minBtn.setHoverColor(Qt.white)
         self.minBtn.setHoverBackgroundColor(QColor(0, 100, 182))
         self.minBtn.setPressedColor(Qt.white)

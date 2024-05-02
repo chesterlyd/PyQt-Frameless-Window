@@ -8,10 +8,11 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt, QEvent
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QLabel, QHBoxLayout, QWidget
+from loguru import logger
 
 from ..utils import startSystemMove
 from .title_bar_buttons import (CloseButton, MaximizeButton, MinimizeButton,
-                                SvgTitleBarButton, TitleBarButton)
+                                SvgTitleBarButton, TitleBarButton, ToolButton)
 
 
 class TitleBarBase(QWidget):
@@ -64,6 +65,9 @@ class TitleBarBase(QWidget):
 
     def __toggleMaxState(self):
         """ Toggles the maximization state of the window and change icon """
+
+        if not self.maxBtn.isVisible():
+            return  # if the button is hidden, do nothing
         if self.window().isMaximized():
             self.window().showNormal()
         else:
@@ -113,9 +117,14 @@ class TitleBar(TitleBarBase):
         self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
         self.hBoxLayout.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
         self.hBoxLayout.addStretch(1)
-        self.hBoxLayout.addWidget(self.minBtn, 0, Qt.AlignRight)
-        self.hBoxLayout.addWidget(self.maxBtn, 0, Qt.AlignRight)
-        self.hBoxLayout.addWidget(self.closeBtn, 0, Qt.AlignRight)
+        self.btnBoxLayout = QHBoxLayout()
+        self.btnBoxLayout.setSpacing(0)
+        self.btnBoxLayout.setContentsMargins(0, 0, 0, 0)
+        self.btnBoxLayout.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
+        self.btnBoxLayout.addWidget(self.minBtn, 0, Qt.AlignRight)
+        self.btnBoxLayout.addWidget(self.maxBtn, 0, Qt.AlignRight)
+        self.btnBoxLayout.addWidget(self.closeBtn, 0, Qt.AlignRight)
+        self.hBoxLayout.addLayout(self.btnBoxLayout)
 
 
 class StandardTitleBar(TitleBar):
@@ -129,6 +138,8 @@ class StandardTitleBar(TitleBar):
         self.hBoxLayout.insertSpacing(0, 10)
         self.hBoxLayout.insertWidget(1, self.iconLabel, 0, Qt.AlignLeft)
         self.window().windowIconChanged.connect(self.setIcon)
+
+        self.item = []
 
         # add title label
         self.titleLabel = QLabel(self)
@@ -160,3 +171,20 @@ class StandardTitleBar(TitleBar):
             the icon of title bar
         """
         self.iconLabel.setPixmap(QIcon(icon).pixmap(20, 20))
+
+    def addItem(self, item_key, text: str = None):
+        """ set the icon of title bar
+        Parameters
+        ----------
+        icon: QIcon | QPixmap | str
+            the icon of title bar
+
+        text: str
+        """
+
+        if item_key in self.item:
+            return
+
+        self.item.append(item_key)
+
+        self.btnBoxLayout.insertWidget(0, ToolButton(item_key, text, self), 0, Qt.AlignLeft)
