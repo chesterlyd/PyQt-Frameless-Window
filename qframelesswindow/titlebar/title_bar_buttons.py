@@ -328,6 +328,9 @@ class ToolButton(TitleBarButton):
 
         self.setProperty("item_key", item_key)
 
+    def text(self):
+        return self._text
+
     def setText(self, text):
         self._text = text
         self.update()

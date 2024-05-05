@@ -139,7 +139,7 @@ class StandardTitleBar(TitleBar):
         self.hBoxLayout.insertWidget(1, self.iconLabel, 0, Qt.AlignLeft)
         self.window().windowIconChanged.connect(self.setIcon)
 
-        self.item = []
+        self.items = {}
 
         # add title label
         self.titleLabel = QLabel(self)
@@ -182,9 +182,22 @@ class StandardTitleBar(TitleBar):
         text: str
         """
 
-        if item_key in self.item:
+        if item_key in self.items:
             return
 
-        self.item.append(item_key)
+        btn = ToolButton(item_key, icon=None, text=text, parent=self)
+        self.items[item_key] = TitleBarItem(item_key, btn)
 
-        self.btnBoxLayout.insertWidget(0, ToolButton(item_key, text, self), 0, Qt.AlignLeft)
+        self.btnBoxLayout.insertWidget(0, btn, 0, Qt.AlignLeft)
+
+    def widget(self, item_key: str):
+        if item_key not in self.items:
+            raise f"`{item_key}` is illegal."
+
+        return self.items[item_key].widget
+
+
+class TitleBarItem:
+    def __init__(self, item_key: str, widget):
+        self.item_key = item_key
+        self.widget = widget
