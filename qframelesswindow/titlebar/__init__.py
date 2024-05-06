@@ -12,7 +12,7 @@ from loguru import logger
 
 from ..utils import startSystemMove
 from .title_bar_buttons import (CloseButton, MaximizeButton, MinimizeButton,
-                                SvgTitleBarButton, TitleBarButton, ToolButton)
+                                SvgTitleBarButton, TitleBarButton, ToolButton, SignalButton)
 
 
 class TitleBarBase(QWidget):
@@ -172,20 +172,18 @@ class StandardTitleBar(TitleBar):
         """
         self.iconLabel.setPixmap(QIcon(icon).pixmap(20, 20))
 
-    def addItem(self, item_key, text: str = None):
+    def addSignalItem(self, item_key):
         """ set the icon of title bar
         Parameters
         ----------
-        icon: QIcon | QPixmap | str
-            the icon of title bar
-
-        text: str
+        item_key: str
+            the key of item
         """
 
         if item_key in self.items:
             return
 
-        btn = ToolButton(item_key, icon=None, text=text, parent=self)
+        btn = SignalButton(item_key, self)
         self.items[item_key] = TitleBarItem(item_key, btn)
 
         self.btnBoxLayout.insertWidget(0, btn, 0, Qt.AlignLeft)

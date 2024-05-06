@@ -42,8 +42,8 @@ class Signals:
             return 0
 
     def get_signal_pixmap(self, color, line_num):
-        rec_width = 30
-        rec_height = 20
+        rec_width = 46
+        rec_height = 32
         signal_width = rec_width // 4
         signal_height = rec_height // 4
         pixmap = QPixmap(rec_width, rec_height + 2)
@@ -59,14 +59,14 @@ class Signals:
         for i in range(4):
             path = QPainterPath()
             path.addRoundedRect(signal_width * i, rec_height - signal_height * (i + 1), signal_width - 3,
-                                signal_height * (i + 1), 2, 2)  # 5, 5 是圆角的半径
+                                signal_height * (i + 1), 0, 0)  # 5, 5 是圆角的半径
             painter.drawPath(path)
 
         painter.setBrush(brush)
         for i in range(line_num):
             path = QPainterPath()
             path.addRoundedRect(signal_width * i, rec_height - signal_height * (i + 1), signal_width - 3,
-                                signal_height * (i + 1), 2, 2)  # 5, 5 是圆角的半径
+                                signal_height * (i + 1), 0, 0)  # 5, 5 是圆角的半径
             painter.drawPath(path)
 
         painter.end()

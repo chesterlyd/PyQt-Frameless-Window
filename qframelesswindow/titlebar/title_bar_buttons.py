@@ -2,7 +2,7 @@
 from enum import Enum
 
 from PySide6.QtCore import QFile, QPointF, QRectF, Qt, Property
-from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen
+from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QBrush
 from PySide6.QtWidgets import QAbstractButton
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtXml import QDomDocument
@@ -357,3 +357,81 @@ class ToolButton(TitleBarButton):
 
         if self._icon:
             painter.drawPixmap(self.rect(), self._icon)
+
+
+class SignalButton(TitleBarButton):
+
+    def __init__(self, item_key, parent=None, is_enabled=True):
+        super().__init__(parent)
+        self.setEnabled(is_enabled)
+
+        self._ping = 25
+
+        self.setProperty("item_key", item_key)
+
+    def setPing(self, ping):
+        self._ping = ping
+        self.update()
+
+    def get_color(self, ping):
+        if ping <= 10:
+            return QColor(0x6a, 0x6a, 0xff)
+        elif ping <= 20:
+            return QColor(0x28, 0x94, 0xff)
+        elif ping <= 30:
+            return QColor(0x00, 0xff, 0xff)
+        elif ping <= 40:
+            return QColor(0x9a, 0xff, 0x02)
+        elif ping <= 50:
+            return QColor(0xe1, 0xe1, 0x00)
+        elif ping <= 60:
+            return QColor(0xea, 0xc1, 0x00)
+        elif ping <= 70:
+            return QColor(0xe8, 0x00, 0xe8)
+        elif ping <= 80:
+            return QColor(0xff, 0x00, 0x80)
+        else:
+            return QColor(0xea, 0x00, 0x00)
+
+    def get_line_num(self, ping):
+        if ping <= 25:
+            return 4
+        elif ping <= 50:
+            return 3
+        elif ping <= 75:
+            return 2
+        elif ping <= 100:
+            return 1
+        else:
+            return 0
+
+    def paintEvent(self, e):
+        painter = QPainter(self)
+        line_num = self.get_line_num(self._ping)
+        brush = QBrush(QColor(255, 255, 255))
+
+        width = self.width()
+        height = self.height()
+
+        width_padding = 14
+        height_padding = 10
+
+        signal_width = (width - width_padding) // 4
+        signal_height = (height - height_padding) // 4
+
+        # draw background
+        painter.setBrush(QColor(0, 0, 0, 26))
+        painter.setPen(Qt.NoPen)
+        painter.drawRect(self.rect())
+
+        # draw 4 vertical rectangles
+        for i in range(4):
+            rect = QRectF(width_padding // 2 + i * signal_width, (height - 5) - signal_height * (i + 1), signal_width - 3,
+                          signal_height * (i + 1))  # Adjust the position and size of the rectangle as needed
+            painter.drawRoundedRect(rect, 2, 2)
+
+        painter.setBrush(brush)
+        for i in range(line_num):
+            rect = QRectF(width_padding // 2 + i * signal_width, (height - 5) - signal_height * (i + 1), signal_width - 3,
+                          signal_height * (i + 1))  # Adjust the position and size of the rectangle as needed
+            painter.drawRoundedRect(rect, 2, 2)
