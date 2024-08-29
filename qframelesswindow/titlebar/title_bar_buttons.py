@@ -1,7 +1,7 @@
 # coding:utf-8
 from enum import Enum
 
-from PySide6.QtCore import QFile, QPointF, QRectF, Qt, Property
+from PySide6.QtCore import QFile, QPointF, QRectF, Qt, Property, QTimer, QTime, QDateTime
 from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QBrush
 from PySide6.QtWidgets import QAbstractButton
 from PySide6.QtSvg import QSvgRenderer
@@ -394,13 +394,15 @@ class SignalButton(TitleBarButton):
             return QColor(0xea, 0x00, 0x00)
 
     def get_line_num(self, ping):
-        if ping <= 25:
+        if ping >= 14:
+            return 5
+        elif ping >= 12:
             return 4
-        elif ping <= 50:
+        elif ping >= 9:
             return 3
-        elif ping <= 75:
+        elif ping >= 7:
             return 2
-        elif ping <= 100:
+        elif ping >= 4:
             return 1
         else:
             return 0
@@ -416,8 +418,8 @@ class SignalButton(TitleBarButton):
         width_padding = 14
         height_padding = 10
 
-        signal_width = (width - width_padding) // 4
-        signal_height = (height - height_padding) // 4
+        signal_width = (width - width_padding) // 5
+        signal_height = (height - height_padding) // 5
 
         # draw background
         painter.setBrush(QColor(0, 0, 0, 26))
@@ -425,7 +427,7 @@ class SignalButton(TitleBarButton):
         painter.drawRect(self.rect())
 
         # draw 4 vertical rectangles
-        for i in range(4):
+        for i in range(5):
             rect = QRectF(width_padding // 2 + i * signal_width, (height - 5) - signal_height * (i + 1), signal_width - 3,
                           signal_height * (i + 1))  # Adjust the position and size of the rectangle as needed
             painter.drawRoundedRect(rect, 2, 2)
@@ -435,3 +437,30 @@ class SignalButton(TitleBarButton):
             rect = QRectF(width_padding // 2 + i * signal_width, (height - 5) - signal_height * (i + 1), signal_width - 3,
                           signal_height * (i + 1))  # Adjust the position and size of the rectangle as needed
             painter.drawRoundedRect(rect, 2, 2)
+
+
+class DateTimeButton(TitleBarButton):
+    def __init__(self, item_key, time_str='yyyy-MM-dd hh:mm:ss', parent=None, is_enabled=True):
+        super().__init__(parent)
+        self.setFixedWidth(150)
+        self.setEnabled(is_enabled)
+        self.setProperty("item_key", item_key)
+
+        self.time_str = time_str
+        self.current_time = QDateTime.currentDateTime().toString(self.time_str)
+
+        # 创建一个 QTimer 对象
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.updateTime)
+        self.timer.start(1000)  # 每秒更新一次
+
+    def updateTime(self):
+        # 获取当前时间并将其格式化为 yyyy-MM-dd hh:mm:ss
+        self.current_time = QDateTime.currentDateTime().toString(self.time_str)
+        self.update()
+
+    def paintEvent(self, e):
+        painter = QPainter(self)
+        brush = QBrush(QColor(0, 0, 0))
+        painter.setBrush(brush)
+        painter.drawText(self.rect(), Qt.AlignCenter, self.current_time)

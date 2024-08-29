@@ -12,7 +12,7 @@ from loguru import logger
 
 from ..utils import startSystemMove
 from .title_bar_buttons import (CloseButton, MaximizeButton, MinimizeButton,
-                                SvgTitleBarButton, TitleBarButton, ToolButton, SignalButton)
+                                SvgTitleBarButton, TitleBarButton, ToolButton, SignalButton, DateTimeButton)
 
 
 class TitleBarBase(QWidget):
@@ -184,6 +184,24 @@ class StandardTitleBar(TitleBar):
             return
 
         btn = SignalButton(item_key, self)
+        self.items[item_key] = TitleBarItem(item_key, btn)
+
+        self.btnBoxLayout.insertWidget(0, btn, 0, Qt.AlignLeft)
+
+    def addDateTimeItem(self, item_key, time_format='yyyy-MM-dd hh:mm:ss'):
+        """ set the icon of title bar
+        Parameters
+        ----------
+        item_key: str
+            the key of item
+        time_format: str
+            the time format of time
+        """
+
+        if item_key in self.items:
+            return
+
+        btn = DateTimeButton(item_key, time_format, self)
         self.items[item_key] = TitleBarItem(item_key, btn)
 
         self.btnBoxLayout.insertWidget(0, btn, 0, Qt.AlignLeft)
